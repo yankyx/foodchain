@@ -245,18 +245,13 @@
             name.textContent = creature.name;
             container.appendChild(icon);
             container.appendChild(name);
-            // 【已移除】不再需要 makeDraggable 函数，因为我们统一使用HTML5拖放API
             return container;
         }
-
-        // 【已移除】不再需要 makeDraggable 函数
-        // function makeDraggable(element) { ... }
 
         function initCanvasDrop() {
             canvas.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 canvas.classList.add('drop-zone-active');
-                // 【修改】根据拖拽源是画布还是生物池，设置不同的效果
                 if (gameState.canvasCreatures.has(gameState.draggedCreatureId)) {
                     e.dataTransfer.dropEffect = 'move';
                 } else {
@@ -279,20 +274,17 @@
                 const x = e.clientX - rect.left - 30;
                 const y = e.clientY - rect.top - 30;
 
-                // 【修改】核心逻辑：判断是移动现有元素还是添加新元素
                 if (gameState.canvasCreatures.has(creatureId)) {
-                    // 如果生物已在画布上，这是一个移动操作
                     const creatureState = gameState.canvasCreatures.get(creatureId);
                     creatureState.x = x;
                     creatureState.y = y;
                     creatureState.element.style.left = `${x}px`;
                     creatureState.element.style.top = `${y}px`;
-                    updateConnections(); // 移动后更新连接线
+                    updateConnections();
                     showStatus(`移动了 ${creatureState.element.dataset.creatureName}`);
                     return;
                 }
 
-                // 如果生物不在画布上，这是一个添加操作
                 const creature = creaturesData.find(c => c.id === creatureId);
                 if (creature) {
                     const creatureElement = createCreatureElement(creature);
@@ -306,13 +298,12 @@
                         y: y
                     });
 
-                    // 为画布上的新元素添加拖放事件
                     creatureElement.setAttribute('draggable', 'true');
                     creatureElement.addEventListener('dragstart', (e) => {
                         gameState.draggingElement = creatureElement;
                         gameState.draggedCreatureId = creatureId;
                         e.dataTransfer.setData('text/plain', creatureId);
-                        e.dataTransfer.effectAllowed = 'copyMove'; // 允许复制和移动
+                        e.dataTransfer.effectAllowed = 'copyMove';
                         setTimeout(() => creatureElement.classList.add('opacity-50'), 0);
                     });
 
@@ -326,7 +317,6 @@
                         e.preventDefault();
                         if (gameState.draggingElement && gameState.draggingElement !== creatureElement) {
                             creatureElement.classList.add('ring-2', 'ring-primary');
-                            // 【修改】关键点！设置效果为"copy"，防止浏览器移除被拖拽的元素
                             e.dataTransfer.dropEffect = 'copy';
                         }
                     });
@@ -336,7 +326,7 @@
                     });
 
                     creatureElement.addEventListener('drop', (e) => {
-                        e.stopPropagation(); // 阻止事件冒泡到父级(canvas)的drop事件
+                        e.stopPropagation();
                         e.preventDefault();
                         creatureElement.classList.remove('ring-2', 'ring-primary');
                         const preyId = parseInt(e.dataTransfer.getData('text/plain'));
@@ -378,9 +368,8 @@
                 svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svg.id = 'canvas-svg';
                 svg.className = 'absolute top-0 left-0 w-full h-full pointer-events-none';
-                // 【修改】设置 z-index 确保SVG层在图标之上，这样线条才可见
                 svg.style.zIndex = '10';
-                canvas.insertBefore(svg, canvas.firstChild); // 插入到最前面，但z-index使其在最上层
+                canvas.insertBefore(svg, canvas.firstChild);
             }
 
             const lineId = `connection-${preyId}-${predatorId}`;
@@ -388,7 +377,7 @@
 
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.id = lineId;
-            line.setAttribute('stroke', '#165DFF'); // 直接设置颜色更可靠
+            line.setAttribute('stroke', '#165DFF');
             line.setAttribute('stroke-width', '2');
             line.dataset.preyId = preyId;
             line.dataset.predatorId = predatorId;
@@ -407,7 +396,8 @@
                 marker.setAttribute('refY', '5');
                 marker.setAttribute('markerWidth', '6');
                 marker.setAttribute('markerHeight', '6');
-                marker.setAttribute('orient', 'auto-start-reverse');
+                // 【关键修改】将 'auto-start-reverse' 改为 'auto'，以提高浏览器兼容性
+                marker.setAttribute('orient', 'auto');
                 const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
                 polygon.setAttribute('points', '0 0, 10 5, 0 10');
                 polygon.setAttribute('fill', '#165DFF');
@@ -431,10 +421,10 @@
             const dy = predatorY - preyY;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
-            if (distance === 0) return; // 避免除以零
+            if (distance === 0) return;
 
             const startOffset = 28;
-            const endOffset = 32; // 留出箭头空间
+            const endOffset = 32;
             const startX = preyX + (dx / distance) * startOffset;
             const startY = preyY + (dy / distance) * startOffset;
             const endX = predatorX - (dx / distance) * endOffset;
@@ -457,7 +447,6 @@
             });
         }
 
-        // --- 以下函数没有重大修改 ---
         function checkFoodChain() {
             if (gameState.canvasCreatures.size === 0) {
                 showStatus('画布上没有生物，请添加生物后再检查');
@@ -583,7 +572,6 @@
         }
 
         function showInfo(message) {
-            infoMessage.textContent = message;
             infoPanel.classList.remove('hidden');
             infoPanel.classList.add('flex');
             setTimeout(() => {
