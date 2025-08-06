@@ -53,7 +53,6 @@
                 @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
             }
         }
-        /* 修复CSS兼容性警告 */
         :host, html {
             -webkit-text-size-adjust: 100%;
             text-size-adjust: 100%;
@@ -114,56 +113,122 @@
     </footer>
 
     <script>
-        // 生物数据 - 40种生物
         const creaturesData = [
-            { id: 1, name: '草', emoji: '🌿', type: 'producer', prey: [] },
-            { id: 2, name: '兔子', emoji: '🐰', type: 'consumer', prey: [1] },
-            { id: 3, name: '狐狸', emoji: '🦊', type: 'consumer', prey: [2] },
-            { id: 4, name: '狮子', emoji: '🦁', type: 'consumer', prey: [2, 3] },
-            { id: 5, name: '老鼠', emoji: '🐭', type: 'consumer', prey: [1] },
-            { id: 6, name: '蛇', emoji: '🐍', type: 'consumer', prey: [2, 5] },
-            { id: 7, name: '鹰', emoji: '🦅', type: 'consumer', prey: [2, 5, 6] },
-            { id: 8, name: '蚂蚁', emoji: '🐜', type: 'consumer', prey: [1] },
-            { id: 9, name: '蜘蛛', emoji: '🕷️', type: 'consumer', prey: [8] },
-            { id: 10, name: '鸟', emoji: '🐦', type: 'consumer', prey: [8] },
-            { id: 11, name: '鱼', emoji: '🐟', type: 'consumer', prey: [12] },
-            { id: 12, name: '浮游生物', emoji: '🦠', type: 'producer', prey: [] },
-            { id: 13, name: '青蛙', emoji: '🐸', type: 'consumer', prey: [8, 10] },
-            { id: 14, name: '鳄鱼', emoji: '🐊', type: 'consumer', prey: [2, 13, 15] },
-            { id: 15, name: '鹿', emoji: '🦌', type: 'consumer', prey: [1] },
-            { id: 16, name: '狼', emoji: '🐺', type: 'consumer', prey: [2, 15] },
-            { id: 17, name: '熊', emoji: '🐻', type: 'consumer', prey: [2, 3, 15] },
-            { id: 18, name: '蜜蜂', emoji: '🐝', type: 'consumer', prey: [1] },
-            { id: 19, name: '蝴蝶', emoji: '🦋', type: 'consumer', prey: [1] },
-            { id: 20, name: '猫头鹰', emoji: '🦉', type: 'consumer', prey: [5, 9] },
-            { id: 21, name: '蜈蚣', emoji: '🐛', type: 'consumer', prey: [8] },
-            { id: 22, name: '蜥蜴', emoji: '🦎', type: 'consumer', prey: [8, 21] },
-            { id: 23, name: '龟', emoji: '🐢', type: 'consumer', prey: [12, 11] },
-            { id: 24, name: '虾', emoji: '🦐', type: 'consumer', prey: [12] },
-            { id: 25, name: '蟹', emoji: '🦀', type: 'consumer', prey: [12, 24] },
-            { id: 26, name: '章鱼', emoji: '🐙', type: 'consumer', prey: [11, 24, 25] },
-            { id: 27, name: '海鸟', emoji: '🐦‍⬛', type: 'consumer', prey: [11, 24] },
-            { id: 28, name: '豹子', emoji: '🐆', type: 'consumer', prey: [2, 15] },
-            { id: 29, name: '大象', emoji: '🐘', type: 'consumer', prey: [1] },
-            { id: 30, name: '犀牛', emoji: '🦏', type: 'consumer', prey: [1] },
-            { id: 31, name: '河马', emoji: '🦛', type: 'consumer', prey: [1] },
-            { id: 32, name: '长颈鹿', emoji: '🦒', type: 'consumer', prey: [1] },
-            { id: 33, name: '斑马', emoji: '🦓', type: 'consumer', prey: [1] },
-            { id: 34, name: '猴子', emoji: '🐒', type: 'consumer', prey: [1] },
-            { id: 35, name: '猩猩', emoji: '🦧', type: 'consumer', prey: [1] },
-            { id: 36, name: '熊猫', emoji: '🐼', type: 'consumer', prey: [1] },
-            { id: 37, name: '袋鼠', emoji: '🦘', type: 'consumer', prey: [1] },
-            { id: 38, name: '考拉', emoji: '🐨', type: 'consumer', prey: [1] },
-            { id: 39, name: '企鹅', emoji: '🐧', type: 'consumer', prey: [11, 24] },
-            { id: 40, name: '鲸鱼', emoji: '🐋', type: 'consumer', prey: [11, 24, 26] }
+            { id: 1, name: '草', emoji: '🌿', type: 'producer', prey: [] }, { id: 2, name: '兔子', emoji: '🐰', type: 'consumer', prey: [1] }, { id: 3, name: '狐狸', emoji: '🦊', type: 'consumer', prey: [2] }, { id: 4, name: '狮子', emoji: '🦁', type: 'consumer', prey: [2, 3] }, { id: 5, name: '老鼠', emoji: '🐭', type: 'consumer', prey: [1] }, { id: 6, name: '蛇', emoji: '🐍', type: 'consumer', prey: [2, 5] }, { id: 7, name: '鹰', emoji: '🦅', type: 'consumer', prey: [2, 5, 6] }, { id: 8, name: '蚂蚁', emoji: '🐜', type: 'consumer', prey: [1] }, { id: 9, name: '蜘蛛', emoji: '🕷️', type: 'consumer', prey: [8] }, { id: 10, name: '鸟', emoji: '🐦', type: 'consumer', prey: [8] }, { id: 11, name: '鱼', emoji: '🐟', type: 'consumer', prey: [12] }, { id: 12, name: '浮游生物', emoji: '🦠', type: 'producer', prey: [] }, { id: 13, name: '青蛙', emoji: '🐸', type: 'consumer', prey: [8, 10] }, { id: 14, name: '鳄鱼', emoji: '🐊', type: 'consumer', prey: [2, 13, 15] }, { id: 15, name: '鹿', emoji: '🦌', type: 'consumer', prey: [1] }, { id: 16, name: '狼', emoji: '🐺', type: 'consumer', prey: [2, 15] }, { id: 17, name: '熊', emoji: '🐻', type: 'consumer', prey: [2, 3, 15] }, { id: 18, name: '蜜蜂', emoji: '🐝', type: 'consumer', prey: [1] }, { id: 19, name: '蝴蝶', emoji: '🦋', type: 'consumer', prey: [1] }, { id: 20, name: '猫头鹰', emoji: '🦉', type: 'consumer', prey: [5, 9] }, { id: 21, name: '蜈蚣', emoji: '🐛', type: 'consumer', prey: [8] }, { id: 22, name: '蜥蜴', emoji: '🦎', type: 'consumer', prey: [8, 21] }, { id: 23, name: '龟', emoji: '🐢', type: 'consumer', prey: [12, 11] }, { id: 24, name: '虾', emoji: '🦐', type: 'consumer', prey: [12] }, { id: 25, name: '蟹', emoji: '🦀', type: 'consumer', prey: [12, 24] }, { id: 26, name: '章鱼', emoji: '🐙', type: 'consumer', prey: [11, 24, 25] }, { id: 27, name: '海鸟', emoji: '🐦‍⬛', type: 'consumer', prey: [11, 24] }, { id: 28, name: '豹子', emoji: '🐆', type: 'consumer', prey: [2, 15] }, { id: 29, name: '大象', emoji: '🐘', type: 'consumer', prey: [1] }, { id: 30, name: '犀牛', emoji: '🦏', type: 'consumer', prey: [1] }, { id: 31, name: '河马', emoji: '🦛', type: 'consumer', prey: [1] }, { id: 32, name: '长颈鹿', emoji: '🦒', type: 'consumer', prey: [1] }, { id: 33, name: '斑马', emoji: '🦓', type: 'consumer', prey: [1] }, { id: 34, name: '猴子', emoji: '🐒', type: 'consumer', prey: [1] }, { id: 35, name: '猩猩', emoji: '🦧', type: 'consumer', prey: [1] }, { id: 36, name: '熊猫', emoji: '🐼', type: 'consumer', prey: [1] }, { id: 37, name: '袋鼠', emoji: '🦘', type: 'consumer', prey: [1] }, { id: 38, name: '考拉', emoji: '🐨', type: 'consumer', prey: [1] }, { id: 39, name: '企鹅', emoji: '🐧', type: 'consumer', prey: [11, 24] }, { id: 40, name: '鲸鱼', emoji: '🐋', type: 'consumer', prey: [11, 24, 26] }
         ];
 
-        const levels = Array.from({ length: 10 }, (_, i) => ({
-            level: i + 1,
-            creatureCount: 4 + i * 2,
-            creatureIds: creaturesData.slice(0, 4 + i * 2).map(c => c.id)
-        }));
+        // --- 【修改】 关卡生成逻辑 ---
 
+        /**
+         * 检查一个生物在给定的生物ID集合中是否是孤立的
+         * @param {number} creatureId - 要检查的生物ID
+         * @param {Set<number>} creatureIdSet - 当前关卡的生物ID集合
+         * @returns {boolean} - 如果是孤立的，返回true
+         */
+        function isCreatureIsolated(creatureId, creatureIdSet) {
+            const creature = creaturesData.find(c => c.id === creatureId);
+            if (!creature) return true;
+
+            // 检查它是否能捕食集合中的任何生物
+            const canEat = creature.prey.some(preyId => creatureIdSet.has(preyId));
+            if (canEat) return false;
+
+            // 检查它是否能被集合中的任何生物捕食
+            const isEaten = creaturesData.some(predator =>
+                creatureIdSet.has(predator.id) && predator.prey.includes(creatureId)
+            );
+            if (isEaten) return false;
+
+            return true;
+        }
+
+        /**
+         * 生成所有关卡的数据
+         * @returns {Array<object>} - 包含10个关卡对象的数组
+         */
+        function generateLevels() {
+            const generatedLevels = [];
+
+            for (let i = 0; i < 10; i++) {
+                const levelNum = i + 1;
+                const creatureCount = 4 + i * 2;
+                let creatureIds = [];
+
+                if (levelNum === 1) {
+                    // 第一关保持固定
+                    creatureIds = creaturesData.slice(0, creatureCount).map(c => c.id);
+                } else {
+                    // 关卡 2-10 进行随机生成
+                    let attempts = 0;
+                    while(attempts < 50) { // 设置尝试次数上限，防止死循环
+                        const availableCreatures = [...creaturesData];
+                        const selectedCreatures = new Set();
+
+                        // 1. 随机选择一个“种子”生物
+                        const startIndex = Math.floor(Math.random() * availableCreatures.length);
+                        selectedCreatures.add(availableCreatures.splice(startIndex, 1)[0].id);
+
+                        // 2. 循环扩张食物网，直到数量达标
+                        while (selectedCreatures.size < creatureCount && availableCreatures.length > 0) {
+                            // 3. 找到所有与已选生物有关联的“候选者”
+                            const candidates = availableCreatures.filter(candidate => {
+                                // A) 候选者能吃掉已选中的生物
+                                const eatsSelected = candidate.prey.some(preyId => selectedCreatures.has(preyId));
+                                // B) 候选者能被已选中的生物吃掉
+                                const eatenBySelected = creaturesData.some(predator =>
+                                    selectedCreatures.has(predator.id) && predator.prey.includes(candidate.id)
+                                );
+                                return eatsSelected || eatenBySelected;
+                            });
+
+                            let nextCreature;
+                            if (candidates.length > 0) {
+                                // 4. 从有关联的候选者中随机选一个
+                                const candidateIndex = Math.floor(Math.random() * candidates.length);
+                                nextCreature = candidates[candidateIndex];
+                            } else {
+                                // 5. 如果没有关联者了（防止生成断开的食物网），从剩余所有生物中随机选一个来“搭桥”
+                                const fallbackIndex = Math.floor(Math.random() * availableCreatures.length);
+                                nextCreature = availableCreatures[fallbackIndex];
+                            }
+
+                            selectedCreatures.add(nextCreature.id);
+                            const indexInAvailable = availableCreatures.findIndex(c => c.id === nextCreature.id);
+                            if (indexInAvailable > -1) {
+                                availableCreatures.splice(indexInAvailable, 1);
+                            }
+                        }
+
+                        // 6. 最终校验，确保没有孤立节点
+                        const finalIds = Array.from(selectedCreatures);
+                        const hasIsolated = finalIds.some(id => isCreatureIsolated(id, selectedCreatures));
+
+                        if (!hasIsolated) {
+                            creatureIds = finalIds;
+                            break; // 生成成功，跳出尝试循环
+                        }
+                        attempts++;
+                    }
+
+                    // 如果尝试多次仍失败，则使用保底的固定生成法
+                    if (creatureIds.length === 0) {
+                        creatureIds = creaturesData.slice(0, creatureCount).map(c => c.id);
+                    }
+                }
+
+                generatedLevels.push({
+                    level: levelNum,
+                    creatureCount: creatureCount,
+                    creatureIds: creatureIds
+                });
+            }
+            return generatedLevels;
+        }
+
+        // 【修改】调用新的关卡生成函数
+        const levels = generateLevels();
+
+        // --- 游戏状态和DOM元素（无修改） ---
         const gameState = {
             currentLevel: 1,
             canvasCreatures: new Map(),
@@ -171,7 +236,6 @@
             draggingElement: null,
             draggedCreatureId: null
         };
-
         const levelSelector = document.getElementById('level-selector');
         const creaturesContainer = document.getElementById('creatures-container');
         const canvas = document.getElementById('canvas');
@@ -181,6 +245,7 @@
         const infoPanel = document.getElementById('info-panel');
         const infoMessage = document.getElementById('info-message');
 
+        // --- 以下所有游戏核心函数均无需修改 ---
         function initLevelSelector() {
             levelSelector.innerHTML = '';
             levels.forEach(level => {
@@ -203,7 +268,8 @@
                 btn.className = `btn-level ${(i + 1) === levelNum ? 'btn-level-active' : 'btn-level-inactive'}`;
             });
             updateCreaturesContainer();
-            showStatus(`已切换到第${levelNum}关，包含${levels[levelNum - 1].creatureCount}种生物`);
+            const creatureCount = levels[levelNum - 1].creatureIds.length;
+            showStatus(`已切换到第${levelNum}关，包含${creatureCount}种生物`);
         }
 
         function updateCreaturesContainer() {
@@ -258,22 +324,17 @@
                     e.dataTransfer.dropEffect = 'copy';
                 }
             });
-
             canvas.addEventListener('dragleave', () => {
                 canvas.classList.remove('drop-zone-active');
             });
-
             canvas.addEventListener('drop', (e) => {
                 e.preventDefault();
                 canvas.classList.remove('drop-zone-active');
-
                 const creatureId = parseInt(e.dataTransfer.getData('text/plain'));
                 if (isNaN(creatureId)) return;
-
                 const rect = canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left - 30;
                 const y = e.clientY - rect.top - 30;
-
                 if (gameState.canvasCreatures.has(creatureId)) {
                     const creatureState = gameState.canvasCreatures.get(creatureId);
                     creatureState.x = x;
@@ -284,7 +345,6 @@
                     showStatus(`移动了 ${creatureState.element.dataset.creatureName}`);
                     return;
                 }
-
                 const creature = creaturesData.find(c => c.id === creatureId);
                 if (creature) {
                     const creatureElement = createCreatureElement(creature);
@@ -297,7 +357,6 @@
                         x: x,
                         y: y
                     });
-
                     creatureElement.setAttribute('draggable', 'true');
                     creatureElement.addEventListener('dragstart', (e) => {
                         gameState.draggingElement = creatureElement;
@@ -306,13 +365,11 @@
                         e.dataTransfer.effectAllowed = 'copyMove';
                         setTimeout(() => creatureElement.classList.add('opacity-50'), 0);
                     });
-
                     creatureElement.addEventListener('dragend', () => {
                         gameState.draggingElement = null;
                         gameState.draggedCreatureId = null;
                         creatureElement.classList.remove('opacity-50', 'ring-2', 'ring-primary');
                     });
-
                     creatureElement.addEventListener('dragover', (e) => {
                         e.preventDefault();
                         if (gameState.draggingElement && gameState.draggingElement !== creatureElement) {
@@ -320,24 +377,20 @@
                             e.dataTransfer.dropEffect = 'copy';
                         }
                     });
-
                     creatureElement.addEventListener('dragleave', () => {
                         creatureElement.classList.remove('ring-2', 'ring-primary');
                     });
-
                     creatureElement.addEventListener('drop', (e) => {
                         e.stopPropagation();
                         e.preventDefault();
                         creatureElement.classList.remove('ring-2', 'ring-primary');
                         const preyId = parseInt(e.dataTransfer.getData('text/plain'));
                         if (isNaN(preyId)) return;
-
                         const predatorId = parseInt(creatureElement.dataset.creatureId);
                         if (preyId === predatorId) {
                             showInfo(`生物不能捕食自己`);
                             return;
                         }
-
                         const predator = creaturesData.find(c => c.id === predatorId);
                         const prey = creaturesData.find(c => c.id === preyId);
                         if (predator && prey && predator.prey.includes(preyId)) {
@@ -362,28 +415,21 @@
             const prey = gameState.canvasCreatures.get(preyId);
             const predator = gameState.canvasCreatures.get(predatorId);
             if (!prey || !predator) return;
-
             let svg = document.querySelector('#canvas-svg');
             if (!svg) {
                 svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svg.id = 'canvas-svg';
-
-                // 【最终修复】不再使用className，而是用JS直接设置样式
-                // 确保SVG图层能正确地撑满整个画布
                 svg.style.position = 'absolute';
                 svg.style.top = '0';
                 svg.style.left = '0';
                 svg.style.width = '100%';
                 svg.style.height = '100%';
-                svg.style.pointerEvents = 'none'; // 保持鼠标事件可以穿透
+                svg.style.pointerEvents = 'none';
                 svg.style.zIndex = '10';
-
                 canvas.appendChild(svg);
             }
-
             const lineId = `connection-${preyId}-${predatorId}`;
             if (document.getElementById(lineId)) return;
-
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.id = lineId;
             line.setAttribute('stroke', '#165DFF');
@@ -391,7 +437,6 @@
             line.dataset.preyId = preyId;
             line.dataset.predatorId = predatorId;
             updateLinePosition(line, preyId, predatorId);
-
             let defs = svg.querySelector('defs');
             if (!defs) {
                 defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -420,7 +465,6 @@
             const prey = gameState.canvasCreatures.get(preyId);
             const predator = gameState.canvasCreatures.get(predatorId);
             if (!prey || !predator) return;
-
             const preyX = prey.x + 28;
             const preyY = prey.y + 28;
             const predatorX = predator.x + 28;
@@ -428,16 +472,13 @@
             const dx = predatorX - preyX;
             const dy = predatorY - preyY;
             const distance = Math.sqrt(dx * dx + dy * dy);
-
             if (distance === 0) return;
-
             const startOffset = 28;
             const endOffset = 32;
             const startX = preyX + (dx / distance) * startOffset;
             const startY = preyY + (dy / distance) * startOffset;
             const endX = predatorX - (dx / distance) * endOffset;
             const endY = predatorY - (dy / distance) * endOffset;
-
             line.setAttribute('x1', startX);
             line.setAttribute('y1', startY);
             line.setAttribute('x2', endX);
@@ -491,8 +532,9 @@
             consumers.forEach(id => {
                 const creature = creaturesData.find(c => c.id === id);
                 const possiblePrey = creature.prey.filter(preyId => requiredCreatures.includes(preyId));
-                const hasFood = possiblePrey.some(preyId => foodWeb.get(id).prey.has(preyId));
-                if (!hasFood && possiblePrey.length > 0) {
+                // A consumer is valid if it has no possible prey in this level, or if it has established a food source.
+                const hasFood = possiblePrey.length === 0 || possiblePrey.some(preyId => foodWeb.get(id).prey.has(preyId));
+                if (!hasFood) {
                     allConsumersHaveFood = false;
                     showStatus(`${creature.name} 没有食物来源`);
                 }
@@ -502,13 +544,13 @@
                 return;
             }
             let hasProducerConsumerConnection = false;
-            if (consumers.length > 0) {
-                producers.forEach(producerId => {
+            if (consumers.length > 0 && producers.length > 0) {
+                 producers.forEach(producerId => {
                     if (foodWeb.get(producerId).predators.size > 0) {
                         hasProducerConsumerConnection = true;
                     }
                 });
-                if (!hasProducerConsumerConnection && producers.length > 0) {
+                if (!hasProducerConsumerConnection) {
                      showStatus('请连接生产者和消费者');
                      playSound(false);
                      return;
