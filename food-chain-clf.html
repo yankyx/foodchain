@@ -52,6 +52,10 @@
             .btn-level-inactive {
                 @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
             }
+            /* 【新增】用于禁用生物的样式 */
+            .creature-disabled {
+                @apply filter grayscale opacity-50 cursor-not-allowed pointer-events-none;
+            }
         }
         :host, html {
             -webkit-text-size-adjust: 100%;
@@ -117,105 +121,67 @@
             { id: 1, name: '草', emoji: '🌿', type: 'producer', prey: [] }, { id: 2, name: '兔子', emoji: '🐰', type: 'consumer', prey: [1] }, { id: 3, name: '狐狸', emoji: '🦊', type: 'consumer', prey: [2] }, { id: 4, name: '狮子', emoji: '🦁', type: 'consumer', prey: [2, 3] }, { id: 5, name: '老鼠', emoji: '🐭', type: 'consumer', prey: [1] }, { id: 6, name: '蛇', emoji: '🐍', type: 'consumer', prey: [2, 5] }, { id: 7, name: '鹰', emoji: '🦅', type: 'consumer', prey: [2, 5, 6] }, { id: 8, name: '蚂蚁', emoji: '🐜', type: 'consumer', prey: [1] }, { id: 9, name: '蜘蛛', emoji: '🕷️', type: 'consumer', prey: [8] }, { id: 10, name: '鸟', emoji: '🐦', type: 'consumer', prey: [8] }, { id: 11, name: '鱼', emoji: '🐟', type: 'consumer', prey: [12] }, { id: 12, name: '浮游生物', emoji: '🦠', type: 'producer', prey: [] }, { id: 13, name: '青蛙', emoji: '🐸', type: 'consumer', prey: [8, 10] }, { id: 14, name: '鳄鱼', emoji: '🐊', type: 'consumer', prey: [2, 13, 15] }, { id: 15, name: '鹿', emoji: '🦌', type: 'consumer', prey: [1] }, { id: 16, name: '狼', emoji: '🐺', type: 'consumer', prey: [2, 15] }, { id: 17, name: '熊', emoji: '🐻', type: 'consumer', prey: [2, 3, 15] }, { id: 18, name: '蜜蜂', emoji: '🐝', type: 'consumer', prey: [1] }, { id: 19, name: '蝴蝶', emoji: '🦋', type: 'consumer', prey: [1] }, { id: 20, name: '猫头鹰', emoji: '🦉', type: 'consumer', prey: [5, 9] }, { id: 21, name: '蜈蚣', emoji: '🐛', type: 'consumer', prey: [8] }, { id: 22, name: '蜥蜴', emoji: '🦎', type: 'consumer', prey: [8, 21] }, { id: 23, name: '龟', emoji: '🐢', type: 'consumer', prey: [12, 11] }, { id: 24, name: '虾', emoji: '🦐', type: 'consumer', prey: [12] }, { id: 25, name: '蟹', emoji: '🦀', type: 'consumer', prey: [12, 24] }, { id: 26, name: '章鱼', emoji: '🐙', type: 'consumer', prey: [11, 24, 25] }, { id: 27, name: '海鸟', emoji: '🐦‍⬛', type: 'consumer', prey: [11, 24] }, { id: 28, name: '豹子', emoji: '🐆', type: 'consumer', prey: [2, 15] }, { id: 29, name: '大象', emoji: '🐘', type: 'consumer', prey: [1] }, { id: 30, name: '犀牛', emoji: '🦏', type: 'consumer', prey: [1] }, { id: 31, name: '河马', emoji: '🦛', type: 'consumer', prey: [1] }, { id: 32, name: '长颈鹿', emoji: '🦒', type: 'consumer', prey: [1] }, { id: 33, name: '斑马', emoji: '🦓', type: 'consumer', prey: [1] }, { id: 34, name: '猴子', emoji: '🐒', type: 'consumer', prey: [1] }, { id: 35, name: '猩猩', emoji: '🦧', type: 'consumer', prey: [1] }, { id: 36, name: '熊猫', emoji: '🐼', type: 'consumer', prey: [1] }, { id: 37, name: '袋鼠', emoji: '🦘', type: 'consumer', prey: [1] }, { id: 38, name: '考拉', emoji: '🐨', type: 'consumer', prey: [1] }, { id: 39, name: '企鹅', emoji: '🐧', type: 'consumer', prey: [11, 24] }, { id: 40, name: '鲸鱼', emoji: '🐋', type: 'consumer', prey: [11, 24, 26] }
         ];
 
-        // --- 【修改】 关卡生成逻辑 ---
-
-        /**
-         * 检查一个生物在给定的生物ID集合中是否是孤立的
-         * @param {number} creatureId - 要检查的生物ID
-         * @param {Set<number>} creatureIdSet - 当前关卡的生物ID集合
-         * @returns {boolean} - 如果是孤立的，返回true
-         */
         function isCreatureIsolated(creatureId, creatureIdSet) {
             const creature = creaturesData.find(c => c.id === creatureId);
             if (!creature) return true;
-
-            // 检查它是否能捕食集合中的任何生物
             const canEat = creature.prey.some(preyId => creatureIdSet.has(preyId));
             if (canEat) return false;
-
-            // 检查它是否能被集合中的任何生物捕食
             const isEaten = creaturesData.some(predator =>
                 creatureIdSet.has(predator.id) && predator.prey.includes(creatureId)
             );
             if (isEaten) return false;
-
             return true;
         }
 
-        /**
-         * 生成所有关卡的数据
-         * @returns {Array<object>} - 包含10个关卡对象的数组
-         */
         function generateLevels() {
             const generatedLevels = [];
-
             for (let i = 0; i < 10; i++) {
                 const levelNum = i + 1;
                 const creatureCount = 4 + i * 2;
                 let creatureIds = [];
-
                 if (levelNum === 1) {
-                    // 第一关保持固定
                     creatureIds = creaturesData.slice(0, creatureCount).map(c => c.id);
                 } else {
-                    // 关卡 2-10 进行随机生成
                     let attempts = 0;
-                    while(attempts < 50) { // 设置尝试次数上限，防止死循环
+                    while (attempts < 50) {
                         const availableCreatures = [...creaturesData];
                         const selectedCreatures = new Set();
-
-                        // 1. 随机选择一个“种子”生物
                         const startIndex = Math.floor(Math.random() * availableCreatures.length);
                         selectedCreatures.add(availableCreatures.splice(startIndex, 1)[0].id);
-
-                        // 2. 循环扩张食物网，直到数量达标
                         while (selectedCreatures.size < creatureCount && availableCreatures.length > 0) {
-                            // 3. 找到所有与已选生物有关联的“候选者”
                             const candidates = availableCreatures.filter(candidate => {
-                                // A) 候选者能吃掉已选中的生物
                                 const eatsSelected = candidate.prey.some(preyId => selectedCreatures.has(preyId));
-                                // B) 候选者能被已选中的生物吃掉
                                 const eatenBySelected = creaturesData.some(predator =>
                                     selectedCreatures.has(predator.id) && predator.prey.includes(candidate.id)
                                 );
                                 return eatsSelected || eatenBySelected;
                             });
-
                             let nextCreature;
                             if (candidates.length > 0) {
-                                // 4. 从有关联的候选者中随机选一个
                                 const candidateIndex = Math.floor(Math.random() * candidates.length);
                                 nextCreature = candidates[candidateIndex];
                             } else {
-                                // 5. 如果没有关联者了（防止生成断开的食物网），从剩余所有生物中随机选一个来“搭桥”
                                 const fallbackIndex = Math.floor(Math.random() * availableCreatures.length);
                                 nextCreature = availableCreatures[fallbackIndex];
                             }
-
                             selectedCreatures.add(nextCreature.id);
                             const indexInAvailable = availableCreatures.findIndex(c => c.id === nextCreature.id);
                             if (indexInAvailable > -1) {
                                 availableCreatures.splice(indexInAvailable, 1);
                             }
                         }
-
-                        // 6. 最终校验，确保没有孤立节点
                         const finalIds = Array.from(selectedCreatures);
                         const hasIsolated = finalIds.some(id => isCreatureIsolated(id, selectedCreatures));
-
                         if (!hasIsolated) {
                             creatureIds = finalIds;
-                            break; // 生成成功，跳出尝试循环
+                            break;
                         }
                         attempts++;
                     }
-
-                    // 如果尝试多次仍失败，则使用保底的固定生成法
                     if (creatureIds.length === 0) {
                         creatureIds = creaturesData.slice(0, creatureCount).map(c => c.id);
                     }
                 }
-
                 generatedLevels.push({
                     level: levelNum,
                     creatureCount: creatureCount,
@@ -225,10 +191,7 @@
             return generatedLevels;
         }
 
-        // 【修改】调用新的关卡生成函数
         const levels = generateLevels();
-
-        // --- 游戏状态和DOM元素（无修改） ---
         const gameState = {
             currentLevel: 1,
             canvasCreatures: new Map(),
@@ -245,7 +208,6 @@
         const infoPanel = document.getElementById('info-panel');
         const infoMessage = document.getElementById('info-message');
 
-        // --- 以下所有游戏核心函数均无需修改 ---
         function initLevelSelector() {
             levelSelector.innerHTML = '';
             levels.forEach(level => {
@@ -272,29 +234,61 @@
             showStatus(`已切换到第${levelNum}关，包含${creatureCount}种生物`);
         }
 
-        function updateCreaturesContainer() {
+        // --- 【修改】生物池的创建和更新逻辑 ---
+
+        /**
+         * 【新增】一次性创建所有生物的图标并放入池中
+         */
+        function initCreaturesPool() {
             creaturesContainer.innerHTML = '';
-            const currentLevelCreatures = levels[gameState.currentLevel - 1].creatureIds;
-            creaturesData
-                .filter(creature => currentLevelCreatures.includes(creature.id))
-                .forEach(creature => {
-                    const creatureElement = createCreatureElement(creature, false);
-                    creatureElement.classList.add('drag-item');
-                    creatureElement.setAttribute('draggable', 'true');
-                    creatureElement.addEventListener('dragstart', (e) => {
-                        gameState.draggingElement = creatureElement;
-                        gameState.draggedCreatureId = creature.id;
-                        e.dataTransfer.setData('text/plain', creature.id);
-                        e.dataTransfer.effectAllowed = 'copyMove';
-                        setTimeout(() => creatureElement.classList.add('opacity-50'), 0);
-                    });
-                    creatureElement.addEventListener('dragend', () => {
-                        gameState.draggingElement = null;
-                        gameState.draggedCreatureId = null;
-                        creatureElement.classList.remove('opacity-50');
-                    });
-                    creaturesContainer.appendChild(creatureElement);
+            creaturesData.forEach(creature => {
+                const creatureElement = createCreatureElement(creature, false);
+                creatureElement.classList.add('drag-item');
+
+                // 拖拽事件监听器
+                creatureElement.addEventListener('dragstart', (e) => {
+                    // 在开始拖拽前，检查元素是否是可拖拽的
+                    if (creatureElement.getAttribute('draggable') !== 'true') {
+                        e.preventDefault();
+                        return;
+                    }
+                    gameState.draggingElement = creatureElement;
+                    gameState.draggedCreatureId = creature.id;
+                    e.dataTransfer.setData('text/plain', creature.id);
+                    e.dataTransfer.effectAllowed = 'copyMove';
+                    setTimeout(() => creatureElement.classList.add('opacity-50'), 0);
                 });
+
+                creatureElement.addEventListener('dragend', () => {
+                    // dragend只在成功开始拖拽后触发，所以无需检查
+                    gameState.draggingElement = null;
+                    gameState.draggedCreatureId = null;
+                    creatureElement.classList.remove('opacity-50');
+                });
+
+                creaturesContainer.appendChild(creatureElement);
+            });
+        }
+
+        /**
+         * 【重写】更新生物池中所有生物的状态（可用/禁用），而不是重新创建它们
+         */
+        function updateCreaturesContainer() {
+            const currentLevelCreatureIds = new Set(levels[gameState.currentLevel - 1].creatureIds);
+            const creatureElements = creaturesContainer.querySelectorAll('[data-creature-id]');
+
+            creatureElements.forEach(element => {
+                const creatureId = parseInt(element.dataset.creatureId);
+                if (currentLevelCreatureIds.has(creatureId)) {
+                    // 如果是当前关卡的生物，则启用
+                    element.setAttribute('draggable', 'true');
+                    element.classList.remove('creature-disabled');
+                } else {
+                    // 如果不是，则禁用
+                    element.setAttribute('draggable', 'false');
+                    element.classList.add('creature-disabled');
+                }
+            });
         }
 
         function createCreatureElement(creature, isOnCanvas = true) {
@@ -532,7 +526,6 @@
             consumers.forEach(id => {
                 const creature = creaturesData.find(c => c.id === id);
                 const possiblePrey = creature.prey.filter(preyId => requiredCreatures.includes(preyId));
-                // A consumer is valid if it has no possible prey in this level, or if it has established a food source.
                 const hasFood = possiblePrey.length === 0 || possiblePrey.some(preyId => foodWeb.get(id).prey.has(preyId));
                 if (!hasFood) {
                     allConsumersHaveFood = false;
@@ -635,9 +628,13 @@
             window.addEventListener('resize', updateConnections);
         }
 
+        /**
+         * 【修改】游戏初始化函数
+         */
         function initGame() {
             initLevelSelector();
-            updateCreaturesContainer();
+            initCreaturesPool(); // 先创建出所有生物的图标
+            updateCreaturesContainer(); // 然后根据第一关的状态更新它们的UI
             initCanvasDrop();
             initEventListeners();
             levelInfo.textContent = `当前关卡: 第${gameState.currentLevel}关`;
