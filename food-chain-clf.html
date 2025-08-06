@@ -52,7 +52,6 @@
             .btn-level-inactive {
                 @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
             }
-            /* 【新增】用于禁用生物的样式 */
             .creature-disabled {
                 @apply filter grayscale opacity-50 cursor-not-allowed pointer-events-none;
             }
@@ -63,7 +62,7 @@
         }
     </style>
 </head>
-<body class="font-inter bg-gray-50 min-h-screen flex flex-col overflow-hidden">
+<body class="font-inter bg-gray-50 h-screen flex flex-col overflow-hidden">
     <header class="bg-white shadow-sm py-3 px-4 sm:px-6 lg:px-8 flex items-center justify-between z-10">
         <div class="flex items-center space-x-2">
             <i class="fa fa-link text-primary text-xl"></i>
@@ -75,13 +74,13 @@
         </div>
     </header>
 
-    <main class="flex-1 flex flex-col md:flex-row overflow-hidden p-3 md:p-4 gap-3">
-        <div class="w-full md:w-72 bg-white rounded-lg shadow-sm p-4 flex flex-col gap-4 overflow-hidden">
+    <main class="flex-1 flex flex-row overflow-hidden p-3 md:p-4 gap-3">
+        <div class="w-2/5 md:w-72 bg-white rounded-lg shadow-sm p-4 flex flex-col gap-4 overflow-hidden">
             <div class="space-y-2">
                 <h2 class="text-lg font-semibold text-gray-800 flex items-center">
                     <i class="fa fa-list-ol text-primary mr-2"></i>关卡选择
                 </h2>
-                <div id="level-selector" class="grid grid-cols-5 gap-2 max-h-28 overflow-y-auto p-1 bg-gray-50 rounded-md">
+                <div id="level-selector" class="grid grid-cols-3 sm:grid-cols-5 gap-2 max-h-28 overflow-y-auto p-1 bg-gray-50 rounded-md">
                     </div>
                 <button id="check-btn" class="w-full mt-2 bg-primary hover:bg-primary/90 text-white py-2 rounded-md transition-all duration-200 flex items-center justify-center gap-2">
                     <i class="fa fa-check-circle"></i>
@@ -89,11 +88,11 @@
                 </button>
             </div>
 
-            <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="flex-1 flex flex-col overflow-hidden min-h-0">
                 <h2 class="text-lg font-semibold text-gray-800 flex items-center mb-2">
                     <i class="fa fa-paw text-primary mr-2"></i>可用生物
                 </h2>
-                <div id="creatures-container" class="flex-1 grid grid-cols-3 sm:grid-cols-4 gap-2 p-2 bg-gray-50 rounded-md overflow-y-auto">
+                <div id="creatures-container" class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 p-2 bg-gray-50 rounded-md overflow-y-auto">
                     </div>
             </div>
         </div>
@@ -234,20 +233,12 @@
             showStatus(`已切换到第${levelNum}关，包含${creatureCount}种生物`);
         }
 
-        // --- 【修改】生物池的创建和更新逻辑 ---
-
-        /**
-         * 【新增】一次性创建所有生物的图标并放入池中
-         */
         function initCreaturesPool() {
             creaturesContainer.innerHTML = '';
             creaturesData.forEach(creature => {
                 const creatureElement = createCreatureElement(creature, false);
                 creatureElement.classList.add('drag-item');
-
-                // 拖拽事件监听器
                 creatureElement.addEventListener('dragstart', (e) => {
-                    // 在开始拖拽前，检查元素是否是可拖拽的
                     if (creatureElement.getAttribute('draggable') !== 'true') {
                         e.preventDefault();
                         return;
@@ -258,33 +249,24 @@
                     e.dataTransfer.effectAllowed = 'copyMove';
                     setTimeout(() => creatureElement.classList.add('opacity-50'), 0);
                 });
-
                 creatureElement.addEventListener('dragend', () => {
-                    // dragend只在成功开始拖拽后触发，所以无需检查
                     gameState.draggingElement = null;
                     gameState.draggedCreatureId = null;
                     creatureElement.classList.remove('opacity-50');
                 });
-
                 creaturesContainer.appendChild(creatureElement);
             });
         }
 
-        /**
-         * 【重写】更新生物池中所有生物的状态（可用/禁用），而不是重新创建它们
-         */
         function updateCreaturesContainer() {
             const currentLevelCreatureIds = new Set(levels[gameState.currentLevel - 1].creatureIds);
             const creatureElements = creaturesContainer.querySelectorAll('[data-creature-id]');
-
             creatureElements.forEach(element => {
                 const creatureId = parseInt(element.dataset.creatureId);
                 if (currentLevelCreatureIds.has(creatureId)) {
-                    // 如果是当前关卡的生物，则启用
                     element.setAttribute('draggable', 'true');
                     element.classList.remove('creature-disabled');
                 } else {
-                    // 如果不是，则禁用
                     element.setAttribute('draggable', 'false');
                     element.classList.add('creature-disabled');
                 }
@@ -628,13 +610,11 @@
             window.addEventListener('resize', updateConnections);
         }
 
-        /**
-         * 【修改】游戏初始化函数
-         */
+
         function initGame() {
             initLevelSelector();
-            initCreaturesPool(); // 先创建出所有生物的图标
-            updateCreaturesContainer(); // 然后根据第一关的状态更新它们的UI
+            initCreaturesPool();
+            updateCreaturesContainer();
             initCanvasDrop();
             initEventListeners();
             levelInfo.textContent = `当前关卡: 第${gameState.currentLevel}关`;
