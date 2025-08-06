@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食物链搭建模拟器</title>
+    <!-- 生产环境应使用本地安装的Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        accent: '#722ED1',
+                        warning: '#FF7D00',
+                        danger: '#F53F3F',
+                        success: '#00B42A',
+                        neutral: '#86909C',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .drag-item {
+                @apply cursor-move transition-all duration-200 hover:scale-110 hover:shadow-lg;
+            }
+            .drop-zone {
+                @apply border-2 border-dashed border-primary/30 transition-all duration-200;
+            }
+            .drop-zone-active {
+                @apply border-primary bg-primary/5;
+            }
+            .creature-icon {
+                @apply flex items-center justify-center w-14 h-14 text-3xl bg-white rounded-full shadow-md transition-all duration-300 hover:shadow-lg;
+            }
+            .btn-level {
+                @apply px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium;
+            }
+            .btn-level-active {
+                @apply bg-primary text-white;
+            }
+            .btn-level-inactive {
+                @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
+            }
+        }
+        /* 修复CSS兼容性警告 */
+        :host, html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen flex flex-col overflow-hidden">
+    <!-- 顶部导航 -->
+    <header class="bg-white shadow-sm py-3 px-4 sm:px-6 lg:px-8 flex items-center justify-between z-10">
+        <div class="flex items-center space-x-2">
+            <i class="fa fa-link text-primary text-xl"></i>
+            <h1 class="text-[clamp(1.2rem,3vw,1.8rem)] font-bold text-gray-900">食物链搭建模拟器</h1>
+        </div>
+        <div id="info-panel" class="text-sm text-gray-600 bg-blue-50 px-3 py-1.5 rounded-md hidden items-center space-x-1 max-w-xs">
+            <i class="fa fa-info-circle text-primary"></i>
+            <span id="info-message">将被捕食者拖拽到捕食者上建立关系</span>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden p-3 md:p-4 gap-3">
+        <!-- 左侧控制面板 -->
+        <div class="w-full md:w-72 bg-white rounded-lg shadow-sm p-4 flex flex-col gap-4 overflow-hidden">
+            <!-- 关卡选择 -->
+            <div class="space-y-2">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+                    <i class="fa fa-list-ol text-primary mr-2"></i>关卡选择
+                </h2>
+                <div id="level-selector" class="grid grid-cols-5 gap-2 max-h-28 overflow-y-auto p-1 bg-gray-50 rounded-md">
+                    <!-- 关卡按钮将通过JS动态生成 -->
+                </div>
+                <button id="check-btn" class="w-full mt-2 bg-primary hover:bg-primary/90 text-white py-2 rounded-md transition-all duration-200 flex items-center justify-center gap-2">
+                    <i class="fa fa-check-circle"></i>
+                    <span>检查食物链</span>
+                </button>
+            </div>
+
+            <!-- 生物选择区 -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center mb-2">
+                    <i class="fa fa-paw text-primary mr-2"></i>可用生物
+                </h2>
+                <div id="creatures-container" class="flex-1 grid grid-cols-3 sm:grid-cols-4 gap-2 p-2 bg-gray-50 rounded-md overflow-y-auto">
+                    <!-- 生物图标将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧画布 -->
+        <div class="flex-1 bg-white rounded-lg shadow-sm p-3 overflow-hidden flex flex-col">
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center mb-2 px-2">
+                <i class="fa fa-draw-polygon text-primary mr-2"></i>画布区域
+            </h2>
+            <div id="canvas" class="flex-1 drop-zone rounded-md relative overflow-auto bg-gray-50">
+                <!-- 生物和连线将在这里动态生成 -->
+            </div>
+            <div class="mt-2 text-xs text-gray-500 flex items-center justify-between px-2">
+                <span>提示: 从左侧拖拽生物到画布，然后将被捕食者拖拽到捕食者上</span>
+                <span id="level-info">当前关卡: 第1关</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部状态栏 -->
+    <footer class="bg-white shadow-sm py-2 px-4 text-sm text-gray-500 flex items-center justify-between">
+        <div>食物链搭建模拟器 &copy; 2023</div>
+        <div id="status-bar">准备就绪</div>
+    </footer>
+
+    <script>
+        // 生物数据 - 40种生物
+        const creaturesData = [
+            { id: 1, name: '草', emoji: '🌿', type: 'producer', prey: [] },
+            { id: 2, name: '兔子', emoji: '🐰', type: 'consumer', prey: [1] },
+            { id: 3, name: '狐狸', emoji: '🦊', type: 'consumer', prey: [2] },
+            { id: 4, name: '狮子', emoji: '🦁', type: 'consumer', prey: [2, 3] },
+            { id: 5, name: '老鼠', emoji: '🐭', type: 'consumer', prey: [1] },
+            { id: 6, name: '蛇', emoji: '🐍', type: 'consumer', prey: [2, 5] },
+            { id: 7, name: '鹰', emoji: '🦅', type: 'consumer', prey: [2, 5, 6] },
+            { id: 8, name: '蚂蚁', emoji: '🐜', type: 'consumer', prey: [1] },
+            { id: 9, name: '蜘蛛', emoji: '🕷️', type: 'consumer', prey: [8] },
+            { id: 10, name: '鸟', emoji: '🐦', type: 'consumer', prey: [8] },
+            { id: 11, name: '鱼', emoji: '🐟', type: 'consumer', prey: [12] },
+            { id: 12, name: '浮游生物', emoji: '🦠', type: 'producer', prey: [] },
+            { id: 13, name: '青蛙', emoji: '🐸', type: 'consumer', prey: [8, 10] },
+            { id: 14, name: '鳄鱼', emoji: '🐊', type: 'consumer', prey: [2, 13, 15] },
+            { id: 15, name: '鹿', emoji: '🦌', type: 'consumer', prey: [1] },
+            { id: 16, name: '狼', emoji: '🐺', type: 'consumer', prey: [2, 15] },
+            { id: 17, name: '熊', emoji: '🐻', type: 'consumer', prey: [2, 3, 15] },
+            { id: 18, name: '蜜蜂', emoji: '🐝', type: 'consumer', prey: [1] },
+            { id: 19, name: '蝴蝶', emoji: '🦋', type: 'consumer', prey: [1] },
+            { id: 20, name: '猫头鹰', emoji: '🦉', type: 'consumer', prey: [5, 9] },
+            { id: 21, name: '蜈蚣', emoji: '🐛', type: 'consumer', prey: [8] },
+            { id: 22, name: '蜥蜴', emoji: '🦎', type: 'consumer', prey: [8, 21] },
+            { id: 23, name: '龟', emoji: '🐢', type: 'consumer', prey: [12, 11] },
+            { id: 24, name: '虾', emoji: '🦐', type: 'consumer', prey: [12] },
+            { id: 25, name: '蟹', emoji: '🦀', type: 'consumer', prey: [12, 24] },
+            { id: 26, name: '章鱼', emoji: '🐙', type: 'consumer', prey: [11, 24, 25] },
+            { id: 27, name: '海鸟', emoji: '🐦‍⬛', type: 'consumer', prey: [11, 24] },
+            { id: 28, name: '豹子', emoji: '🐆', type: 'consumer', prey: [2, 15] },
+            { id: 29, name: '大象', emoji: '🐘', type: 'consumer', prey: [1] },
+            { id: 30, name: '犀牛', emoji: '🦏', type: 'consumer', prey: [1] },
+            { id: 31, name: '河马', emoji: '🦛', type: 'consumer', prey: [1] },
+            { id: 32, name: '长颈鹿', emoji: '🦒', type: 'consumer', prey: [1] },
+            { id: 33, name: '斑马', emoji: '🦓', type: 'consumer', prey: [1] },
+            { id: 34, name: '猴子', emoji: '🐒', type: 'consumer', prey: [1] },
+            { id: 35, name: '猩猩', emoji: '🦧', type: 'consumer', prey: [1] },
+            { id: 36, name: '熊猫', emoji: '🐼', type: 'consumer', prey: [1] },
+            { id: 37, name: '袋鼠', emoji: '🦘', type: 'consumer', prey: [1] },
+            { id: 38, name: '考拉', emoji: '🐨', type: 'consumer', prey: [1] },
+            { id: 39, name: '企鹅', emoji: '🐧', type: 'consumer', prey: [11, 24] },
+            { id: 40, name: '鲸鱼', emoji: '🐋', type: 'consumer', prey: [11, 24, 26] }
+        ];
+
+        // 关卡数据 - 10关
+        const levels = Array.from({ length: 10 }, (_, i) => ({
+            level: i + 1,
+            creatureCount: 4 + i * 2,
+            creatureIds: creaturesData.slice(0, 4 + i * 2).map(c => c.id)
+        }));
+
+        // 游戏状态
+        const gameState = {
+            currentLevel: 1,
+            canvasCreatures: new Map(), // id -> {element, x, y}
+            connections: new Set(), // Set of strings "preyId-predatorId"
+            draggingElement: null,
+            draggedCreatureId: null
+        };
+
+        // DOM元素
+        const levelSelector = document.getElementById('level-selector');
+        const creaturesContainer = document.getElementById('creatures-container');
+        const canvas = document.getElementById('canvas');
+        const checkBtn = document.getElementById('check-btn');
+        const statusBar = document.getElementById('status-bar');
+        const levelInfo = document.getElementById('level-info');
+        const infoPanel = document.getElementById('info-panel');
+        const infoMessage = document.getElementById('info-message');
+
+        // 初始化关卡选择器
+        function initLevelSelector() {
+            levelSelector.innerHTML = '';
+            levels.forEach(level => {
+                const button = document.createElement('button');
+                button.className = `btn-level ${level.level === gameState.currentLevel ? 'btn-level-active' : 'btn-level-inactive'}`;
+                button.textContent = level.level;
+                button.addEventListener('click', () => { if (level.level !== gameState.currentLevel) switchLevel(level.level); });
+                levelSelector.appendChild(button);
+            });
+        }
+
+        // 切换关卡
+        function switchLevel(levelNum) {
+            if (levelNum < 1 || levelNum > levels.length) return;
+
+            // 清空画布
+            canvas.innerHTML = '';
+            gameState.canvasCreatures.clear();
+            gameState.connections.clear();
+
+            // 更新当前关卡
+            gameState.currentLevel = levelNum;
+            levelInfo.textContent = `当前关卡: 第${levelNum}关`;
+
+            // 更新关卡按钮状态
+            document.querySelectorAll('.btn-level').forEach((btn, i) => {
+                btn.className = `btn-level ${(i + 1) === levelNum ? 'btn-level-active' : 'btn-level-inactive'}`;
+            });
+
+            // 更新可用生物
+            updateCreaturesContainer();
+
+            // 更新状态栏
+            showStatus(`已切换到第${levelNum}关，包含${levels[levelNum - 1].creatureCount}种生物`);
+        }
+
+        // 更新生物选择容器
+        function updateCreaturesContainer() {
+            creaturesContainer.innerHTML = '';
+            const currentLevelCreatures = levels[gameState.currentLevel - 1].creatureIds;
+
+            creaturesData
+                .filter(creature => currentLevelCreatures.includes(creature.id))
+                .forEach(creature => {
+                    const creatureElement = createCreatureElement(creature, false);
+                    creatureElement.classList.add('drag-item');
+
+                    // 添加拖拽事件
+                    creatureElement.setAttribute('draggable', 'true');
+                    creatureElement.addEventListener('dragstart', (e) => {
+                        gameState.draggingElement = creatureElement;
+                        gameState.draggedCreatureId = creature.id;
+                        e.dataTransfer.setData('text/plain', creature.id);
+                        setTimeout(() => creatureElement.classList.add('opacity-50'), 0);
+                    });
+
+                    creatureElement.addEventListener('dragend', () => {
+                        gameState.draggingElement = null;
+                        gameState.draggedCreatureId = null;
+                        creatureElement.classList.remove('opacity-50');
+                    });
+
+                    creaturesContainer.appendChild(creatureElement);
+                });
+        }
+
+        // 创建生物元素
+        function createCreatureElement(creature, isOnCanvas = true) {
+            const container = document.createElement('div');
+            container.className = 'relative';
+            container.dataset.creatureId = creature.id;
+            container.dataset.creatureName = creature.name;
+
+            const icon = document.createElement('div');
+            icon.className = 'creature-icon';
+            icon.textContent = creature.emoji;
+            icon.title = creature.name;
+
+            const name = document.createElement('div');
+            name.className = 'text-xs text-center mt-1 whitespace-nowrap';
+            name.textContent = creature.name;
+
+            container.appendChild(icon);
+            container.appendChild(name);
+
+            if (isOnCanvas) {
+                // 画布上的生物可以拖动
+                makeDraggable(container);
+            }
+
+            return container;
+        }
+
+        // 使元素可拖动
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // 获取鼠标位置
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // 计算新位置
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // 设置新位置
+                const creatureId = parseInt(element.dataset.creatureId);
+                const creature = gameState.canvasCreatures.get(creatureId);
+                if (creature) {
+                    creature.x = creature.element.offsetLeft - pos1;
+                    creature.y = creature.element.offsetTop - pos2;
+                    creature.element.style.left = `${creature.x}px`;
+                    creature.element.style.top = `${creature.y}px`;
+                    // 更新连线
+                    updateConnections();
+                }
+            }
+
+            function closeDragElement() {
+                // 停止移动
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        // 初始化画布拖拽事件
+        function initCanvasDrop() {
+            canvas.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                canvas.classList.add('drop-zone-active');
+            });
+
+            canvas.addEventListener('dragleave', () => {
+                canvas.classList.remove('drop-zone-active');
+            });
+
+            canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                canvas.classList.remove('drop-zone-active');
+
+                const creatureId = parseInt(e.dataTransfer.getData('text/plain'));
+                if (isNaN(creatureId)) return;
+
+                // 检查是否已经在画布上
+                if (gameState.canvasCreatures.has(creatureId)) {
+                    showStatus('这种生物已经在画布上了');
+                    return;
+                }
+
+                // 获取鼠标在画布上的位置
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left - 30; // 居中
+                const y = e.clientY - rect.top - 30;  // 居中
+
+                // 创建并添加生物到画布
+                const creature = creaturesData.find(c => c.id === creatureId);
+                if (creature) {
+                    const creatureElement = createCreatureElement(creature);
+                    creatureElement.style.position = 'absolute';
+                    creatureElement.style.left = `${x}px`;
+                    creatureElement.style.top = `${y}px`;
+
+                    canvas.appendChild(creatureElement);
+                    gameState.canvasCreatures.set(creatureId, {
+                        element: creatureElement,
+                        x: x,
+                        y: y
+                    });
+
+                    // 添加拖放事件（用于连接生物）
+                    creatureElement.setAttribute('draggable', 'true');
+                    creatureElement.addEventListener('dragstart', (e) => {
+                        gameState.draggingElement = creatureElement;
+                        gameState.draggedCreatureId = creatureId;
+                        e.dataTransfer.setData('text/plain', creatureId);
+                        setTimeout(() => creatureElement.classList.add('opacity-50'), 0);
+                    });
+
+                    creatureElement.addEventListener('dragend', () => {
+                        gameState.draggingElement = null;
+                        gameState.draggedCreatureId = null;
+                        creatureElement.classList.remove('opacity-50');
+                    });
+
+                    creatureElement.addEventListener('dragover', (e) => {
+                        e.preventDefault();
+                        if (gameState.draggingElement && gameState.draggingElement !== creatureElement) {
+                            creatureElement.classList.add('ring-2', 'ring-primary');
+                        }
+                    });
+
+                    creatureElement.addEventListener('dragleave', () => {
+                        creatureElement.classList.remove('ring-2', 'ring-primary');
+                    });
+
+                    creatureElement.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        creatureElement.classList.remove('ring-2', 'ring-primary');
+
+                        const preyId = parseInt(e.dataTransfer.getData('text/plain'));
+                        if (isNaN(preyId)) return;
+
+                        // 捕食者ID
+                        const predatorId = parseInt(creatureElement.dataset.creatureId);
+
+                        // 检查是否是同一生物
+                        if (preyId === predatorId) {
+                            showInfo(`生物不能捕食自己`);
+                            return;
+                        }
+
+                        // 检查捕食关系
+                        const predator = creaturesData.find(c => c.id === predatorId);
+                        const prey = creaturesData.find(c => c.id === preyId);
+
+                        if (predator && prey && predator.prey.includes(preyId)) {
+                            // 有效捕食关系
+                            const connectionKey = `${preyId}-${predatorId}`;
+                            if (!gameState.connections.has(connectionKey)) {
+                                gameState.connections.add(connectionKey);
+                                createConnection(preyId, predatorId);
+                                showInfo(`${prey.name} 被 ${predator.name} 捕食`);
+                            } else {
+                                showInfo(`这种捕食关系已经存在`);
+                            }
+                        } else {
+                            // 无效捕食关系
+                            showInfo(`${predator?.name || '未知生物'} 不能捕食 ${prey?.name || '未知生物'}`);
+                        }
+                    });
+
+                    showStatus(`已添加 ${creature.name} 到画布`);
+                }
+            });
+        }
+
+        // 创建连接
+        function createConnection(preyId, predatorId) {
+            // 检查生物是否存在
+            const prey = gameState.canvasCreatures.get(preyId);
+            const predator = gameState.canvasCreatures.get(predatorId);
+            if (!prey || !predator) return;
+
+            // 创建SVG容器（如果不存在）
+            let svg = document.querySelector('#canvas-svg');
+            if (!svg) {
+                svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.id = 'canvas-svg';
+                svg.className = 'absolute top-0 left-0 w-full h-full pointer-events-none';
+                canvas.appendChild(svg);
+            }
+
+            // 创建连接线ID
+            const lineId = `connection-${preyId}-${predatorId}`;
+
+            // 检查线是否已存在
+            if (document.getElementById(lineId)) return;
+
+            // 创建线
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.id = lineId;
+            line.className = 'stroke-primary stroke-2';
+            line.dataset.preyId = preyId;
+            line.dataset.predatorId = predatorId;
+
+            // 更新线的位置
+            updateLinePosition(line, preyId, predatorId);
+
+            // 添加箭头标记
+            const defs = svg.querySelector('defs') || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            if (!svg.querySelector('defs')) {
+                svg.appendChild(defs);
+            }
+
+            if (!defs.querySelector('#arrowhead')) {
+                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                marker.id = 'arrowhead';
+                marker.viewBox = '0 0 10 10';
+                marker.refX = '8';
+                marker.refY = '5';
+                marker.markerWidth = '6';
+                marker.markerHeight = '6';
+                marker.orient = 'auto';
+
+                const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                polygon.points = '0 0, 10 5, 0 10';
+                polygon.fill = '#165DFF';
+
+                marker.appendChild(polygon);
+                defs.appendChild(marker);
+            }
+
+            line.setAttribute('marker-end', 'url(#arrowhead)');
+            svg.appendChild(line);
+        }
+
+        // 更新连接线位置
+        function updateLinePosition(line, preyId, predatorId) {
+            const prey = gameState.canvasCreatures.get(preyId);
+            const predator = gameState.canvasCreatures.get(predatorId);
+            if (!prey || !predator) return;
+
+            // 生物图标的中心点
+            const preyX = prey.x + 28; // 28 = 56/2 (width/2)
+            const preyY = prey.y + 28; // 28 = 56/2 (height/2)
+            const predatorX = predator.x + 28;
+            const predatorY = predator.y + 28;
+
+            // 计算箭头不紧贴图标的位置
+            const dx = predatorX - preyX;
+            const dy = predatorY - preyY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // 从 prey 出发，距离图标边缘一定距离的点
+            const startOffset = 20; // 距离图标边缘的距离
+            const startX = preyX + (dx / distance) * startOffset;
+            const startY = preyY + (dy / distance) * startOffset;
+
+            // 到 predator 为止，距离图标边缘一定距离的点
+            const endOffset = 20; // 距离图标边缘的距离
+            const endX = predatorX - (dx / distance) * endOffset;
+            const endY = predatorY - (dy / distance) * endOffset;
+
+            line.setAttribute('x1', startX);
+            line.setAttribute('y1', startY);
+            line.setAttribute('x2', endX);
+            line.setAttribute('y2', endY);
+        }
+
+        // 更新所有连接线
+        function updateConnections() {
+            const svg = document.querySelector('#canvas-svg');
+            if (!svg) return;
+
+            const lines = svg.querySelectorAll('line');
+            lines.forEach(line => {
+                const preyId = parseInt(line.dataset.preyId);
+                const predatorId = parseInt(line.dataset.predatorId);
+                updateLinePosition(line, preyId, predatorId);
+            });
+        }
+
+        // 检查食物链是否完整
+        function checkFoodChain() {
+            if (gameState.canvasCreatures.size === 0) {
+                showStatus('画布上没有生物，请添加生物后再检查');
+                return;
+            }
+
+            const currentLevel = levels[gameState.currentLevel - 1];
+            const requiredCreatures = currentLevel.creatureIds;
+            const canvasCreatureIds = Array.from(gameState.canvasCreatures.keys());
+
+            // 检查是否添加了所有必要的生物
+            const missingCreatures = requiredCreatures.filter(id => !canvasCreatureIds.includes(id));
+            if (missingCreatures.length > 0) {
+                const missingNames = missingCreatures.map(id => creaturesData.find(c => c.id === id)?.name || '未知生物').join(', ');
+                showStatus(`请添加以下生物: ${missingNames}`);
+                return;
+            }
+
+            // 构建食物网图
+            const foodWeb = new Map();
+            requiredCreatures.forEach(id => {
+                foodWeb.set(id, { prey: new Set(), predators: new Set() });
+            });
+
+            // 添加连接
+            gameState.connections.forEach(connection => {
+                const [preyId, predatorId] = connection.split('-').map(Number);
+                if (foodWeb.has(preyId) && foodWeb.has(predatorId)) {
+                    foodWeb.get(predatorId).prey.add(preyId);
+                    foodWeb.get(preyId).predators.add(predatorId);
+                }
+            });
+
+            // 检查生产者是否没有被捕食者（除非是更高层级的生物）
+            const producers = requiredCreatures.filter(id => creaturesData.find(c => c.id === id)?.type === 'producer');
+            const consumers = requiredCreatures.filter(id => creaturesData.find(c => c.id === id)?.type === 'consumer');
+
+            // 检查是否有循环
+            if (hasCycle(foodWeb)) {
+                showStatus('食物链中存在循环，这是不合理的');
+                playSound(false);
+                return;
+            }
+
+            // 检查是否所有消费者都有食物来源
+            let allConsumersHaveFood = true;
+            consumers.forEach(id => {
+                const creature = creaturesData.find(c => c.id === id);
+                const possiblePrey = creature.prey.filter(preyId => requiredCreatures.includes(preyId));
+                const hasFood = possiblePrey.some(preyId => foodWeb.get(id).prey.has(preyId));
+                if (!hasFood) {
+                    allConsumersHaveFood = false;
+                    showStatus(`${creature.name} 没有食物来源`);
+                }
+            });
+
+            if (!allConsumersHaveFood) {
+                playSound(false);
+                return;
+            }
+
+            // 检查是否构建了完整的食物网
+            // 简单版本：检查是否至少有一个生产者连接到至少一个消费者
+            let hasProducerConsumerConnection = false;
+            producers.forEach(producerId => {
+                if (foodWeb.get(producerId).predators.size > 0) {
+                    hasProducerConsumerConnection = true;
+                }
+            });
+
+            if (!hasProducerConsumerConnection) {
+                showStatus('请连接生产者和消费者');
+                playSound(false);
+                return;
+            }
+
+            // 所有检查通过
+            showStatus('恭喜！您已构建了一个有效的食物链');
+            playSound(true);
+        }
+
+        // 检查是否有循环
+        function hasCycle(foodWeb) {
+            const visited = new Set();
+            const recursionStack = new Set();
+
+            function dfs(node) {
+                if (!visited.has(node)) {
+                    visited.add(node);
+                    recursionStack.add(node);
+
+                    const predators = Array.from(foodWeb.get(node).predators);
+                    for (const predator of predators) {
+                        if (!visited.has(predator) && dfs(predator)) {
+                            return true;
+                        } else if (recursionStack.has(predator)) {
+                            return true;
+                        }
+                    }
+                }
+                recursionStack.delete(node);
+                return false;
+            }
+
+            for (const node of foodWeb.keys()) {
+                if (dfs(node)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // 播放提示音
+        function playSound(isSuccess) {
+            // 使用本地音效文件
+            const audio = new Audio();
+            if (isSuccess) {
+                audio.src = '正确提示音.mp3';
+            } else {
+                audio.src = '错误提示音.mp3';
+            }
+            audio.play().catch(error => {
+                console.error('播放音效失败:', error);
+                // 如果无法播放音效，使用内置声音API作为备选
+                fallbackPlaySound(isSuccess);
+            });
+        }
+
+        // 备选声音播放函数
+        function fallbackPlaySound(isSuccess) {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                if (isSuccess) {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.5);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } else {
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(110, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(55, audioContext.currentTime + 0.3);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.error('无法创建音频上下文:', e);
+            }
+        }
+
+        // 显示状态栏消息
+        function showStatus(message) {
+            statusBar.textContent = message;
+            statusBar.className = 'text-gray-700';
+
+            setTimeout(() => {
+                if (statusBar.textContent === message) {
+                    statusBar.textContent = '准备就绪';
+                    statusBar.className = 'text-gray-500';
+                }
+            }, 3000);
+        }
+
+        // 显示信息面板
+        function showInfo(message) {
+            infoMessage.textContent = message;
+            infoPanel.classList.remove('hidden');
+            infoPanel.classList.add('flex');
+
+            setTimeout(() => {
+                infoPanel.classList.add('hidden');
+                infoPanel.classList.remove('flex');
+            }, 3000);
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 检查按钮
+            checkBtn.addEventListener('click', checkFoodChain);
+
+            // 窗口调整大小时更新连接线
+            window.addEventListener('resize', updateConnections);
+        }
+
+        // 初始化游戏
+        function initGame() {
+            initLevelSelector();
+            updateCreaturesContainer();
+            initCanvasDrop();
+            initEventListeners();
+            levelInfo.textContent = `当前关卡: 第${gameState.currentLevel}关`;
+            showStatus('游戏已准备就绪');
+        }
+
+        // 启动游戏
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>

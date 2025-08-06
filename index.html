@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食物网挑战 - 森林生态系统</title>
+    <style>
+        /* 页面和字体基础样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+            background-color: #f0f4f8;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* 游戏主容器 */
+        .game-container {
+            width: 95%;
+            max-width: 1200px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 游戏标题 */
+        h1 {
+            text-align: center;
+            color: #1a535c;
+            margin: 0;
+            font-size: 2em;
+        }
+
+        /* 游戏主区域，包含画布和生物池 */
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap; /* 在小屏幕上换行 */
+        }
+
+        /* 游戏画布 */
+        #gameCanvas {
+            border: 2px dashed #a0aec0;
+            border-radius: 12px;
+            background-color: #e2e8f0;
+            background-size: cover;
+            background-position: center;
+            flex-grow: 1; /* 占据更多空间 */
+            cursor: default; /* 默认光标 */
+        }
+
+        /* 生物卡片池 */
+        .sidebar {
+            width: 200px;
+            background-color: #f7fafc;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            margin: 0 0 10px 0;
+            text-align: center;
+            color: #2c5282;
+        }
+
+        /* 单个生物卡片 */
+        .creature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none; /* 防止拖动时选中文本 */
+        }
+
+        .creature-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .creature-item:active {
+            cursor: grabbing;
+        }
+
+        .creature-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .creature-item span {
+            font-weight: 500;
+        }
+
+        /* 信息提示框 */
+        #message-box {
+            min-height: 40px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        /* 控制按钮区域 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        /* 按钮通用样式 */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* 检查按钮 */
+        .btn-check {
+            background-color: #48bb78;
+            color: white;
+        }
+        .btn-check:hover {
+            background-color: #38a169;
+        }
+
+        /* 重置按钮 */
+        .btn-reset {
+            background-color: #f56565;
+            color: white;
+        }
+        .btn-reset:hover {
+            background-color: #e53e3e;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>食物网挑战</h1>
+
+        <div id="message-box">拖动生物到画布，点击画布上的生物可移动或连线！</div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3>生物池</h3>
+                <!-- 关卡1: 森林生态系统 -->
+                <div class="creature-item" draggable="true" data-name="草">
+                    <img src="草.png" alt="草">
+                    <span>草</span>
+                </div>
+                <div class="creature-item" draggable="true" data-name="橡树">
+                    <img src="树.png" alt="橡树">
+                    <span>橡树</span>
+                </div>
+                <div class="creature-item" draggable="true" data-name="兔子">
+                    <img src="兔.png" alt="兔子">
+                    <span>兔子</span>
+                </div>
+                <div class="creature-item" draggable="true" data-name="鹿">
+                    <img src="鹿.png" alt="鹿">
+                    <span>鹿</span>
+                </div>
+                <div class="creature-item" draggable="true" data-name="狐狸">
+                    <img src="狐.png" alt="狐狸">
+                    <span>狐狸</span>
+                </div>
+                <div class="creature-item" draggable="true" data-name="狼">
+                    <img src="狼.png" alt="狼">
+                    <span>狼</span>
+                </div>
+            </div>
+
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+
+        <div class="controls">
+            <button id="check-btn" class="btn btn-check">检查网络</button>
+            <button id="reset-btn" class="btn btn-reset">重置</button>
+        </div>
+    </div>
+
+    <script>
+        // =================================================================
+        // 1. 初始化所有变量和常量 (所有“材料”都放在最前面)
+        // =================================================================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const creaturePool = document.querySelector('.sidebar');
+        const checkBtn = document.getElementById('check-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const messageBox = document.getElementById('message-box');
+
+        // 游戏状态变量
+        let creaturesOnCanvas = [];
+        let lines = [];
+        let draggedCreatureData = null;
+        let isDrawingLine = false;
+        let lineStartCreature = null;
+        let isDraggingCreature = false;
+        let draggedCreatureOnCanvas = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let gameReady = false; // 游戏是否准备就绪
+
+        // 游戏配置和资源
+        const creatureImages = {};
+        const sounds = {};
+        const creatureSize = 60;
+        const foodWebLogic = {
+            '兔子': ['草', '橡树'],
+            '鹿': ['草', '橡树'],
+            '狐狸': ['兔子'],
+            '狼': ['兔子', '鹿']
+        };
+
+        // =================================================================
+        // 2. 定义所有函数 (所有“菜谱”都放在中间)
+        // =================================================================
+
+        /**
+         * 同步Canvas的画板尺寸和显示尺寸，解决坐标系不匹配问题
+         */
+        function resizeCanvas() {
+            const displayWidth  = canvas.clientWidth;
+            const displayHeight = canvas.clientHeight;
+            if (canvas.width  !== displayWidth || canvas.height !== displayHeight) {
+                canvas.width  = displayWidth;
+                canvas.height = displayHeight;
+                console.log(`Canvas尺寸已同步为: ${canvas.width}x${canvas.height}`);
+                // 尺寸变化后，需要重绘一次画布上的所有内容
+                redrawCanvas();
+            }
+        }
+
+        /**
+         * 重新绘制整个画布
+         */
+        function redrawCanvas() {
+            if (!ctx) return; // 确保ctx存在
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制连接线
+            lines.forEach(line => {
+                ctx.beginPath();
+                ctx.moveTo(line.from.x + creatureSize / 2, line.from.y + creatureSize / 2);
+                ctx.lineTo(line.to.x + creatureSize / 2, line.to.y + creatureSize / 2);
+                ctx.strokeStyle = '#2c5282';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                drawArrow(line.from, line.to);
+            });
+
+            // 绘制生物
+            creaturesOnCanvas.forEach(creature => {
+                const img = creatureImages[creature.name];
+                if (img && img.complete) {
+                    ctx.globalAlpha = (isDraggingCreature && creature.id === draggedCreatureOnCanvas.id) ? 0.6 : 1.0;
+                    ctx.drawImage(img, creature.x, creature.y, creatureSize, creatureSize);
+                    ctx.globalAlpha = 1.0;
+                    ctx.fillStyle = '#1a202c';
+                    ctx.textAlign = 'center';
+                    ctx.font = '14px sans-serif';
+                    ctx.fillText(creature.name, creature.x + creatureSize / 2, creature.y + creatureSize + 15);
+                }
+            });
+        }
+
+        /**
+         * 在连接线末端绘制箭头
+         */
+        function drawArrow(from, to) {
+            const headlen = 10;
+            const angle = Math.atan2(to.y - from.y, to.x - from.x);
+            const toX = to.x + creatureSize / 2;
+            const toY = to.y + creatureSize / 2;
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.strokeStyle = '#2c5282';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        /**
+         * 加载所有图片和音频资源
+         */
+        function loadResources() {
+            const imageItems = document.querySelectorAll('.creature-item');
+            const audioSources = {
+                correct: '正确提示音.mp3', // 确保文件名正确
+                wrong: '错误提示音.mp3'   // 确保文件名正确
+            };
+
+            const totalResources = imageItems.length + Object.keys(audioSources).length;
+            if (totalResources === 0) {
+                startGame();
+                return;
+            }
+            let loadedResources = 0;
+
+            function resourceLoaded() {
+                loadedResources++;
+                if (loadedResources === totalResources) {
+                    startGame();
+                }
+            }
+
+            function startGame() {
+                gameReady = true;
+                console.log("游戏已就绪！可以开始了！");
+                showMessage('拖动生物到画布，开始挑战吧！', 'blue');
+            }
+
+            imageItems.forEach(item => {
+                const name = item.dataset.name;
+                const imgSrc = item.querySelector('img').getAttribute('src');
+                const image = new Image();
+                image.src = encodeURI(imgSrc);
+                image.onload = resourceLoaded;
+                image.onerror = () => { console.error(`图片加载失败: ${imgSrc}`); resourceLoaded(); };
+                creatureImages[name] = image;
+            });
+
+            for (const [key, src] of Object.entries(audioSources)) {
+                const audio = new Audio();
+                audio.src = encodeURI(src);
+                audio.addEventListener('canplaythrough', resourceLoaded, { once: true });
+                audio.onerror = () => { console.error(`音频加载失败: ${src}`); resourceLoaded(); };
+                sounds[key] = audio;
+            }
+        }
+
+        /**
+         * 获取鼠标在Canvas内的坐标
+         */
+        function getMousePos(evt) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
+        }
+
+        /**
+         * 查找指定坐标下的生物
+         */
+        function getCreatureAt(x, y) {
+            for (let i = creaturesOnCanvas.length - 1; i >= 0; i--) {
+                const c = creaturesOnCanvas[i];
+                if (x > c.x && x < c.x + creatureSize && y > c.y && y < c.y + creatureSize) {
+                    return c;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * 在页面上显示提示信息
+         */
+        function showMessage(text, type) {
+            messageBox.textContent = text;
+            messageBox.style.color = '#fff';
+            switch (type) {
+                case 'green': messageBox.style.backgroundColor = '#48bb78'; break;
+                case 'red': messageBox.style.backgroundColor = '#f56565'; break;
+                case 'orange': messageBox.style.backgroundColor = '#ed8936'; break;
+                default: messageBox.style.backgroundColor = '#4299e1';
+            }
+        }
+
+
+        // --- 事件监听器函数定义 ---
+
+        function handleDragStart(e) {
+            if (!gameReady) return e.preventDefault();
+            if (e.target.classList.contains('creature-item')) {
+                draggedCreatureData = { name: e.target.dataset.name };
+            }
+        }
+
+        function handleDrop(e) {
+            if (!gameReady) return;
+            e.preventDefault();
+            if (draggedCreatureData) {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left - creatureSize / 2;
+                const y = e.clientY - rect.top - creatureSize / 2;
+                const exists = creaturesOnCanvas.some(c => c.name === draggedCreatureData.name);
+                if (!exists) {
+                    creaturesOnCanvas.push({ id: Date.now(), name: draggedCreatureData.name, x: x, y: y });
+                    draggedCreatureData = null;
+                    redrawCanvas();
+                } else {
+                    showMessage('这个生物已经在画布上了！', 'orange');
+                }
+            }
+        }
+
+        function handleMouseDown(e) {
+            if (!gameReady) return;
+            const pos = getMousePos(e);
+            const creature = getCreatureAt(pos.x, pos.y);
+            if (creature) {
+                isDraggingCreature = true;
+                isDrawingLine = true;
+                draggedCreatureOnCanvas = creature;
+                lineStartCreature = creature;
+                creature.originalX = creature.x;
+                creature.originalY = creature.y;
+                dragOffsetX = pos.x - creature.x;
+                dragOffsetY = pos.y - creature.y;
+                canvas.style.cursor = 'grabbing';
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (!gameReady || (!isDraggingCreature && !isDrawingLine)) return;
+            const pos = getMousePos(e);
+            redrawCanvas(); // 重绘以清除上一帧的预览
+            if (isDraggingCreature) {
+                draggedCreatureOnCanvas.x = pos.x - dragOffsetX;
+                draggedCreatureOnCanvas.y = pos.y - dragOffsetY;
+            }
+            if (isDrawingLine) {
+                ctx.beginPath();
+                ctx.moveTo(lineStartCreature.x + creatureSize / 2, lineStartCreature.y + creatureSize / 2);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.strokeStyle = '#f56565';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        function handleMouseUp(e) {
+            if (!gameReady || (!isDraggingCreature && !isDrawingLine)) return;
+            const canvasRect = canvas.getBoundingClientRect();
+            const mouseIsOverCanvas = e.clientX >= canvasRect.left && e.clientX <= canvasRect.right &&
+                                        e.clientY >= canvasRect.top && e.clientY <= canvasRect.bottom;
+            if (mouseIsOverCanvas) {
+                const pos = getMousePos(e);
+                const lineEndCreature = getCreatureAt(pos.x, pos.y);
+                if (lineEndCreature && lineStartCreature && lineEndCreature.id !== lineStartCreature.id) {
+                    lineStartCreature.x = lineStartCreature.originalX;
+                    lineStartCreature.y = lineStartCreature.originalY;
+                    const lineExists = lines.some(l => l.from.id === lineStartCreature.id && l.to.id === lineEndCreature.id);
+                    if (foodWebLogic[lineEndCreature.name]?.includes(lineStartCreature.name)) {
+                        if (!lineExists) {
+                            lines.push({ from: lineStartCreature, to: lineEndCreature });
+                            showMessage(`连接成功：${lineEndCreature.name} 吃 ${lineStartCreature.name}`, 'green');
+                            sounds.correct?.play();
+                        } else { showMessage('这个连接已经存在了。', 'orange'); }
+                    } else {
+                        showMessage(`连接错误！${lineEndCreature.name} 不吃 ${lineStartCreature.name}。`, 'red');
+                        sounds.wrong?.play();
+                    }
+                }
+            } else {
+                if (draggedCreatureOnCanvas) {
+                    creaturesOnCanvas = creaturesOnCanvas.filter(c => c.id !== draggedCreatureOnCanvas.id);
+                    lines = lines.filter(l => l.from.id !== draggedCreatureOnCanvas.id && l.to.id !== draggedCreatureOnCanvas.id);
+                    showMessage(`移除了 ${draggedCreatureOnCanvas.name}`, 'blue');
+                }
+            }
+
+            if(draggedCreatureOnCanvas) {
+                delete draggedCreatureOnCanvas.originalX;
+                delete draggedCreatureOnCanvas.originalY;
+            }
+            isDrawingLine = false;
+            isDraggingCreature = false;
+            lineStartCreature = null;
+            draggedCreatureOnCanvas = null;
+            canvas.style.cursor = 'default';
+            redrawCanvas();
+        }
+
+        function handleReset() {
+            creaturesOnCanvas = [];
+            lines = [];
+            redrawCanvas();
+            showMessage('画布已重置，重新开始吧！', 'blue');
+        }
+
+        function handleCheck() {
+            let totalPossibleConnections = Object.values(foodWebLogic).reduce((sum, preyList) => sum + preyList.length, 0);
+            let correctConnections = lines.length;
+            if (correctConnections === 0 && creaturesOnCanvas.length < 2) {
+                    showMessage('请先构建你的食物网！', 'orange');
+                    return;
+            }
+            const score = (correctConnections / totalPossibleConnections) * 100;
+            if (score >= 100) {
+                showMessage(`太棒了！你构建了一个完美的食物网！得分: 100%`, 'green');
+            } else if (score > 50) {
+                    showMessage(`不错！完成了 ${correctConnections}/${totalPossibleConnections} 个正确连接。得分: ${score.toFixed(0)}%`, 'blue');
+            } else {
+                    showMessage(`还需要努力哦！完成了 ${correctConnections}/${totalPossibleConnections} 个正确连接。得分: ${score.toFixed(0)}%`, 'orange');
+            }
+        }
+
+
+        // =================================================================
+        // 3. 启动程序 (所有“执行”代码都放在最后)
+        // =================================================================
+
+        // 绑定所有事件监听器
+        window.addEventListener('resize', resizeCanvas);
+        creaturePool.addEventListener('dragstart', handleDragStart);
+        canvas.addEventListener('dragover', (e) => e.preventDefault());
+        canvas.addEventListener('drop', handleDrop);
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+        resetBtn.addEventListener('click', handleReset);
+        checkBtn.addEventListener('click', handleCheck);
+
+        // 调整一次画布大小，然后开始加载资源
+        resizeCanvas();
+        loadResources();
+
+    </script>
+</body>
+</html>
