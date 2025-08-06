@@ -367,9 +367,18 @@
             if (!svg) {
                 svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
                 svg.id = 'canvas-svg';
-                svg.className = 'absolute top-0 left-0 w-full h-full pointer-events-none';
+
+                // 【最终修复】不再使用className，而是用JS直接设置样式
+                // 确保SVG图层能正确地撑满整个画布
+                svg.style.position = 'absolute';
+                svg.style.top = '0';
+                svg.style.left = '0';
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.style.pointerEvents = 'none'; // 保持鼠标事件可以穿透
                 svg.style.zIndex = '10';
-                canvas.insertBefore(svg, canvas.firstChild);
+
+                canvas.appendChild(svg);
             }
 
             const lineId = `connection-${preyId}-${predatorId}`;
@@ -396,7 +405,6 @@
                 marker.setAttribute('refY', '5');
                 marker.setAttribute('markerWidth', '6');
                 marker.setAttribute('markerHeight', '6');
-                // 【关键修改】将 'auto-start-reverse' 改为 'auto'，以提高浏览器兼容性
                 marker.setAttribute('orient', 'auto');
                 const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
                 polygon.setAttribute('points', '0 0, 10 5, 0 10');
