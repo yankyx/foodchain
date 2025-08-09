@@ -117,48 +117,49 @@
 
     <script>
         const creaturesData = [
-                { id: 1, name: '草', emoji: '🌿', type: 'producer', prey: [] },
-    { id: 2, name: '兔子', emoji: '🐰', type: 'consumer', prey: [1] },
-    { id: 3, name: '狐狸', emoji: '🦊', type: 'consumer', prey: [2] },
-    { id: 4, name: '狮子', emoji: '🦁', type: 'consumer', prey: [2, 3, 15, 28, 33] },
-    { id: 5, name: '老鼠', emoji: '🐭', type: 'consumer', prey: [1] },
-    { id: 6, name: '蛇', emoji: '🐍', type: 'consumer', prey: [2, 5] },
-    { id: 7, name: '鹰', emoji: '🦅', type: 'consumer', prey: [2, 5, 6, 10] },
-    { id: 8, name: '蚂蚁', emoji: '🐜', type: 'consumer', prey: [1] },
-    { id: 9, name: '蜘蛛', emoji: '🕷️', type: 'consumer', prey: [8] },
-    { id: 10, name: '鸟', emoji: '🐦', type: 'consumer', prey: [1, 8] },
-    { id: 11, name: '鱼', emoji: '🐟', type: 'consumer', prey: [12] },
-    { id: 12, name: '藻类', emoji: '🦠', type: 'producer', prey: [] },
-    { id: 13, name: '青蛙', emoji: '🐸', type: 'consumer', prey: [8, 10, 21] },
-    { id: 14, name: '鳄鱼', emoji: '🐊', type: 'consumer', prey: [2, 13, 15, 22, 23] },
-    { id: 15, name: '鹿', emoji: '🦌', type: 'consumer', prey: [1] },
-    { id: 16, name: '狼', emoji: '🐺', type: 'consumer', prey: [2, 15, 28] },
-    { id: 17, name: '熊', emoji: '🐻', type: 'consumer', prey: [2, 3, 15, 16, 25] },
-    { id: 18, name: '蜜蜂', emoji: '🐝', type: 'consumer', prey: [1] },
-    { id: 19, name: '蝴蝶', emoji: '🦋', type: 'consumer', prey: [1] },
-    { id: 20, name: '猫头鹰', emoji: '🦉', type: 'consumer', prey: [5, 9, 10] },
-    { id: 21, name: '蜈蚣', emoji: '🐛', type: 'consumer', prey: [1, 8] },
-    { id: 22, name: '蜥蜴', emoji: '🦎', type: 'consumer', prey: [8, 21] },
-    { id: 23, name: '龟', emoji: '🐢', type: 'consumer', prey: [12, 11] },
-    { id: 24, name: '虾', emoji: '🦐', type: 'consumer', prey: [12] },
-    { id: 25, name: '蟹', emoji: '🦀', type: 'consumer', prey: [12, 24] },
-    { id: 26, name: '章鱼', emoji: '🐙', type: 'consumer', prey: [11, 24, 25] },
-    { id: 27, name: '海鸟', emoji: '🐦‍⬛', type: 'consumer', prey: [11, 24, 25] },
-    { id: 28, name: '豹子', emoji: '🐆', type: 'consumer', prey: [2, 15, 34] },
-    { id: 29, name: '大象', emoji: '🐘', type: 'consumer', prey: [1] },
-    { id: 30, name: '犀牛', emoji: '🦏', type: 'consumer', prey: [1] },
-    { id: 31, name: '河马', emoji: '🦛', type: 'consumer', prey: [1] },
-    { id: 32, name: '长颈鹿', emoji: '🦒', type: 'consumer', prey: [1] },
-    { id: 33, name: '斑马', emoji: '🦓', type: 'consumer', prey: [1] },
-    { id: 34, name: '猴子', emoji: '🐒', type: 'consumer', prey: [1, 5, 8] },
-    { id: 35, name: '蜜獾', emoji: '🦡', type: 'consumer', prey: [5, 6, 8, 9, 21, 22] },
-    { id: 36, name: '虎', emoji: '🐅', type: 'consumer', prey: [2, 3, 15, 16, 33] },
-    { id: 37, name: '鬣狗', emoji: '🐕', type: 'consumer', prey: [2, 3, 15, 16, 28, 33, 36] },
-    { id: 38, name: '猫鼬', emoji: '🐱', type: 'consumer', prey: [5, 6, 8, 9, 21] },
-    { id: 39, name: '企鹅', emoji: '🐧', type: 'consumer', prey: [11, 24] },
-    { id: 40, name: '鲸鱼', emoji: '🐋', type: 'consumer', prey: [11, 24, 26, 27] }
-            ];
+            { id: 1, name: '草', emoji: '🌿', type: 'producer', prey: [] },
+            { id: 2, name: '兔子', emoji: '🐰', type: 'consumer', prey: [1] },
+            { id: 3, name: '狐狸', emoji: '🦊', type: 'consumer', prey: [2] },
+            { id: 4, name: '狮子', emoji: '🦁', type: 'consumer', prey: [2, 3, 15, 28, 33] },
+            { id: 5, name: '老鼠', emoji: '🐭', type: 'consumer', prey: [1] },
+            { id: 6, name: '蛇', emoji: '🐍', type: 'consumer', prey: [2, 5] },
+            { id: 7, name: '鹰', emoji: '🦅', type: 'consumer', prey: [2, 5, 6, 10] },
+            { id: 8, name: '蚂蚁', emoji: '🐜', type: 'consumer', prey: [1] },
+            { id: 9, name: '蜘蛛', emoji: '🕷️', type: 'consumer', prey: [8] },
+            { id: 10, name: '鸟', emoji: '🐦', type: 'consumer', prey: [1, 8] },
+            { id: 11, name: '鱼', emoji: '🐟', type: 'consumer', prey: [12] },
+            { id: 12, name: '藻类', emoji: '🦠', type: 'producer', prey: [] },
+            { id: 13, name: '青蛙', emoji: '🐸', type: 'consumer', prey: [8, 10, 21] },
+            { id: 14, name: '鳄鱼', emoji: '🐊', type: 'consumer', prey: [2, 13, 15, 22, 23] },
+            { id: 15, name: '鹿', emoji: '🦌', type: 'consumer', prey: [1] },
+            { id: 16, name: '狼', emoji: '🐺', type: 'consumer', prey: [2, 15, 28] },
+            { id: 17, name: '熊', emoji: '🐻', type: 'consumer', prey: [2, 3, 15, 16, 25] },
+            { id: 18, name: '蜜蜂', emoji: '🐝', type: 'consumer', prey: [1] },
+            { id: 19, name: '蝴蝶', emoji: '🦋', type: 'consumer', prey: [1] },
+            { id: 20, name: '猫头鹰', emoji: '🦉', type: 'consumer', prey: [5, 9, 10] },
+            { id: 21, name: '蜈蚣', emoji: '🐛', type: 'consumer', prey: [1, 8] },
+            { id: 22, name: '蜥蜴', emoji: '🦎', type: 'consumer', prey: [8, 21] },
+            { id: 23, name: '龟', emoji: '🐢', type: 'consumer', prey: [12, 11] },
+            { id: 24, name: '虾', emoji: '🦐', type: 'consumer', prey: [12] },
+            { id: 25, name: '蟹', emoji: '🦀', type: 'consumer', prey: [12, 24] },
+            { id: 26, name: '章鱼', emoji: '🐙', type: 'consumer', prey: [11, 24, 25] },
+            { id: 27, name: '海鸟', emoji: '🐦‍⬛', type: 'consumer', prey: [11, 24, 25] },
+            { id: 28, name: '豹子', emoji: '🐆', type: 'consumer', prey: [2, 15, 34] },
+            { id: 29, name: '大象', emoji: '🐘', type: 'consumer', prey: [1] },
+            { id: 30, name: '犀牛', emoji: '🦏', type: 'consumer', prey: [1] },
+            { id: 31, name: '河马', emoji: '🦛', type: 'consumer', prey: [1] },
+            { id: 32, name: '长颈鹿', emoji: '🦒', type: 'consumer', prey: [1] },
+            { id: 33, name: '斑马', emoji: '🦓', type: 'consumer', prey: [1] },
+            { id: 34, name: '猴子', emoji: '🐒', type: 'consumer', prey: [1, 5, 8] },
+            { id: 35, name: '蜜獾', emoji: '🦡', type: 'consumer', prey: [5, 6, 8, 9, 21, 22] },
+            { id: 36, name: '虎', emoji: '🐅', type: 'consumer', prey: [2, 3, 15, 16, 33] },
+            { id: 37, name: '鬣狗', emoji: '🐕', type: 'consumer', prey: [2, 3, 15, 16, 28, 33, 36] },
+            { id: 38, name: '猫鼬', emoji: '🐱', type: 'consumer', prey: [5, 6, 8, 9, 21] },
+            { id: 39, name: '企鹅', emoji: '🐧', type: 'consumer', prey: [11, 24] },
+            { id: 40, name: '鲸鱼', emoji: '🐋', type: 'consumer', prey: [11, 24, 26, 27] }
+        ];
 
+        // This function is kept for potential other uses, but is no longer used for level generation.
         function isCreatureIsolated(creatureId, creatureIdSet) {
             const creature = creaturesData.find(c => c.id === creatureId);
             if (!creature) return true;
@@ -171,59 +172,91 @@
             return true;
         }
 
+        // --- MODIFIED FUNCTION ---
+        // This new function generates levels by building a valid food web,
+        // ensuring all requirements are met by construction.
         function generateLevels() {
             const generatedLevels = [];
+            const producers = creaturesData.filter(c => c.type === 'producer');
+
             for (let i = 0; i < 10; i++) {
                 const levelNum = i + 1;
                 const creatureCount = 4 + i * 2;
-                let creatureIds = [];
+                let finalCreatureIds = [];
+
                 if (levelNum === 1) {
-                    creatureIds = creaturesData.slice(0, creatureCount).map(c => c.id);
+                    // Level 1 is a fixed, simple introductory level
+                    finalCreatureIds = creaturesData.slice(0, creatureCount).map(c => c.id);
                 } else {
-                    let attempts = 0;
-                    while (attempts < 50) {
-                        const availableCreatures = [...creaturesData];
-                        const selectedCreatures = new Set();
-                        const startIndex = Math.floor(Math.random() * availableCreatures.length);
-                        selectedCreatures.add(availableCreatures.splice(startIndex, 1)[0].id);
-                        while (selectedCreatures.size < creatureCount && availableCreatures.length > 0) {
-                            const candidates = availableCreatures.filter(candidate => {
-                                const eatsSelected = candidate.prey.some(preyId => selectedCreatures.has(preyId));
-                                const eatenBySelected = creaturesData.some(predator =>
-                                    selectedCreatures.has(predator.id) && predator.prey.includes(candidate.id)
-                                );
-                                return eatsSelected || eatenBySelected;
-                            });
-                            let nextCreature;
-                            if (candidates.length > 0) {
-                                const candidateIndex = Math.floor(Math.random() * candidates.length);
-                                nextCreature = candidates[candidateIndex];
-                            } else {
-                                const fallbackIndex = Math.floor(Math.random() * availableCreatures.length);
-                                nextCreature = availableCreatures[fallbackIndex];
-                            }
-                            selectedCreatures.add(nextCreature.id);
-                            const indexInAvailable = availableCreatures.findIndex(c => c.id === nextCreature.id);
-                            if (indexInAvailable > -1) {
-                                availableCreatures.splice(indexInAvailable, 1);
-                            }
-                        }
-                        const finalIds = Array.from(selectedCreatures);
-                        const hasIsolated = finalIds.some(id => isCreatureIsolated(id, selectedCreatures));
-                        if (!hasIsolated) {
-                            creatureIds = finalIds;
+                    let bestAttemptIds = [];
+                    // We try a few times to get a good distribution, as the process is random
+                    for (let attempt = 0; attempt < 50; attempt++) {
+                        const selectedIds = new Set();
+
+                        // Rule 1: Start with a producer. This guarantees a producer exists.
+                        if (producers.length > 0) {
+                            const randomProducer = producers[Math.floor(Math.random() * producers.length)];
+                            selectedIds.add(randomProducer.id);
+                        } else {
+                            console.error("No producers found in creaturesData.");
                             break;
                         }
-                        attempts++;
+
+                        // Create a pool of creatures that can be added
+                        let availableCreatures = creaturesData.filter(c => !selectedIds.has(c.id));
+
+                        // Build the rest of the food web
+                        while (selectedIds.size < creatureCount && availableCreatures.length > 0) {
+                            // Rule 2: Find candidates that can eat something already in the set
+                            const candidates = availableCreatures.filter(c =>
+                                c.type === 'consumer' && c.prey.some(preyId => selectedIds.has(preyId))
+                            );
+
+                            let creatureToAdd = null;
+                            if (candidates.length > 0) {
+                                // If there are valid consumers, pick one randomly
+                                creatureToAdd = candidates[Math.floor(Math.random() * candidates.length)];
+                            } else {
+                                // If we can't extend existing chains, try adding a new producer to start a new chain
+                                const availableProducers = availableCreatures.filter(c => c.type === 'producer');
+                                if (availableProducers.length > 0) {
+                                   creatureToAdd = availableProducers[Math.floor(Math.random() * availableProducers.length)];
+                                } else {
+                                    // Stop if no more valid creatures can be added.
+                                    break;
+                                }
+                            }
+
+                            if (creatureToAdd) {
+                                selectedIds.add(creatureToAdd.id);
+                                // Remove the added creature from the available pool
+                                availableCreatures = availableCreatures.filter(c => c.id !== creatureToAdd.id);
+                            }
+                        }
+
+                        // We prefer a level that is closer to the target creatureCount
+                        if (selectedIds.size > bestAttemptIds.length) {
+                            bestAttemptIds = Array.from(selectedIds);
+                        }
+                        // If we hit the target count, we can stop early
+                        if (bestAttemptIds.length >= creatureCount) {
+                            break;
+                        }
                     }
-                    if (creatureIds.length === 0) {
-                        creatureIds = creaturesData.slice(0, creatureCount).map(c => c.id);
+
+                    finalCreatureIds = bestAttemptIds;
+
+                    // Fallback: If the logic somehow fails to produce a level
+                    if (finalCreatureIds.length === 0) {
+                        console.warn(`Could not generate level ${levelNum} with new logic. Using original fallback.`);
+                        finalCreatureIds = creaturesData.slice(0, creatureCount).map(c => c.id);
                     }
                 }
+
                 generatedLevels.push({
                     level: levelNum,
-                    creatureCount: creatureCount,
-                    creatureIds: creatureIds
+                    creatureCount: finalCreatureIds.length,
+                    creatureIds: finalCreatureIds
                 });
             }
             return generatedLevels;
@@ -638,6 +671,7 @@
         function showInfo(message) {
             infoPanel.classList.remove('hidden');
             infoPanel.classList.add('flex');
+            infoMessage.textContent = message;
             setTimeout(() => {
                 infoPanel.classList.add('hidden');
                 infoPanel.classList.remove('flex');
@@ -648,7 +682,6 @@
             checkBtn.addEventListener('click', checkFoodChain);
             window.addEventListener('resize', updateConnections);
         }
-
 
         function initGame() {
             initLevelSelector();
